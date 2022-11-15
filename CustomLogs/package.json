@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/ZeCosgrove/ProjetoS1-MEI#readme",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "morgan": "^1.10.0",
+    "winston": "^3.8.2"
   }
 }
