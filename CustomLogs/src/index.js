@@ -1,26 +1,28 @@
 const express = require('express')
-const loggerSS = require('./logger_SS')
+const path = require('path')
+const mongoose = require('mongoose')
+var bodyParser = require('body-parser');
 
 // Constants
 const PORT = 8082
-const HOST = '0.0.0.0'
+const BD_URL = 'mongodb://localhost:27017/CustomLogs'
+
+//load vars
+require('dotenv').config();
+
+// initialize bd
+mongoose.Promise = global.Promise
+mongoose.connect(BD_URL)
+  .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('Error on Connect to MongoDB: ', err))
 
 // App
 const app = express()
-app.get('/', (req, res) => {
-  loggerSS.debug("This is The / route.")
-  res.status(200).send('Hello World!')
-})
+app.use(bodyParser.json())
+app.use("/logs",require('../routes/loggerRoutes'))
+app.use('/', express.static(path.join(__dirname, 'static')))
 
-app.get('/errors', (req, res, next) => {
-  try {
-    throw new Error("ERROR!!")
-  } catch (error) {
-    loggerSS.error('Whoops! This broke something: ', error)
-    res.status(500).send('Error!')
-  }
-})
 
-app.listen(PORT, HOST, () => {
-  loggerSS.info(`Running on http://${HOST}:${PORT}`)
+app.listen(PORT, () => {
+  console.log('Running on Port: ', PORT)
 })
