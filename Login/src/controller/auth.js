@@ -1,17 +1,14 @@
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
+const jwt = require('jsonwebtoken');
 
-exports.getUser = async (req,res) => {
+exports.login = async (req,res) => {
+    if (req.body.user == "" && req.body.password){
+        const token = jwt.sign({userId: 1}, secret, {expiresIn: 600})
+        return res.json({auth: true, token})
+    }
 
-    /*User.find({})
-    .then(function(users){
-        if(users) {
-            res.status(200).json(users)
-        }
-        else {
-            res.status(404).end()
-        }
-    })*/
+    res.status(401).end 
 }
 
 exports.getUser = async (req,res) => {
