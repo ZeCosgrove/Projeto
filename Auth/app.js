@@ -4,9 +4,10 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const rateLimit = require('express-rate-limit')
+const amqplib = require('amqplib/callback_api');
 
 //Demo Variables
-const tokenValidation = 120 //seconds
+const tokenValidation = 60 * 10 //seconds
 const rateLimitTimer = 60 //seconds
 const rateLimiter = 10 //attempts
 
@@ -87,6 +88,7 @@ app.post('/auth/register', async(req, res) => {
     }
 })
 
+
 app.post('/auth/login', async(req, res) => {
     const {username, password} = req.body
 
@@ -126,13 +128,8 @@ app.post('/auth/login', async(req, res) => {
 })
 
 
-
 app.post('/auth/password', async(req, res) => {
     const {password, newPassword} = req.body
-
-    const usertoken = req.headers.authorization;
-    const token = usertoken.split(' ');
-    const tokenData = jwt.verify(token[1], process.env.SECRET);
 
     if(!password){
         return res.status(422).json({msg: "Password necessário"})
@@ -141,7 +138,7 @@ app.post('/auth/password', async(req, res) => {
         return res.status(422).json({msg: "Nova password necessária"})
     }
 
-    const auth = await Auth.findOne({_id: tokenData.id})
+    const auth = await Auth.findOne({_id: await getIdFromToken(req)})
 
     if (!auth){
         return res.status(404).json({msg: "Autenticação necessária"})
@@ -173,6 +170,14 @@ app.get('/user/:id', checkToken, async(req, res) => {
         return res.status(422).json({msg: "Utilizador não encontrado"})
     }
 
+    let dataToLog = {
+        Level: 'Info',
+        Action: `/user/${id}`,
+        Description: user,
+        User: await getIdFromToken(req)
+    }
+
+    SendToLog(dataToLog)
     res.status(200).json(user)
 })
 
@@ -192,6 +197,31 @@ function checkToken(req, res, next) {
     } catch (err) {
         res.status(400).json(err)
     }
+}
+
+const queue = 'tasks';
+function SendToLog(message){
+    amqplib.connect('amqp://localhost', (err, conn) => {
+        if (err) throw err;
+
+        conn.createChannel((err, ch1) => {
+            if (err) throw err;
+
+            ch1.assertQueue(queue);
+
+            setInterval(() => {
+                ch1.sendToQueue(queue, Buffer.from(message));
+            }, 1000);
+        });
+    });
+}
+
+//Utils
+async function getIdFromToken(req){
+    const usertoken = req.headers.authorization;
+    const token = usertoken.split(' ');
+    const tokenData = jwt.verify(token[1], process.env.SECRET);
+    return tokenData.id;
 }
 
 //Mongoose Connection
