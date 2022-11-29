@@ -1,24 +1,23 @@
-const mongoose = require('mongoose')
 const Logs = require('../LoggerModel/loggerModel')
 const moment = require('moment')
 moment.locale("en")
 
 exports.LogRegistInfo = async (req, res) => {
-    console.log(req.body)
-    const {Level, Action, Description} = req.body
+    const {Level, Action, Description, User} = req.body
 
-    if (!Level || !Action || !Description) {
-        res.json({status: 'Log Regist Info Error', error: 'Level or Type or Action cant be null'})
+    if (!Level || !Action || !Description || !User) {
+        res.json({status: 'Log Regist Info Error', error: 'Level or Type or Action or User cant be null'})
     }
-    
+    const LogMoment = Date.now()
     const response = await Logs.create({
         Level,
         Action,
         Description,
-        Date: moment(Date.now()).format("LLL")
+        User,
+        LogMoment
     })
 
-    res.json({status: 'New Log Added'})
+    res.json({status: response})
 }
 
 
