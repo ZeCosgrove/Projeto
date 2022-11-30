@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 const Logs = require('./LoggerModel/loggerModel')
 const moment = require('moment')
 moment.locale("en")
-const amqplib = require('amqplib/callback_api')
+var amqp = require('amqplib/callback_api');
 const queue = 'tasks'
 
 // Constants
@@ -36,26 +36,28 @@ async function LogRegisto(message) {
   console.log(LogCreated)
 }
 
-
-amqplib.connect('amqp://localhost', (err, conn) => {
-if (err) throw err
-
-// Listener
-conn.createChannel((err, ch2) => {
-  if (err) throw err
-
-  ch2.assertQueue(queue);
-
-  ch2.consume(queue, (msg) => {
-    if (msg !== null) {
-      console.log(msg.content.toString());
-      LogRegisto(msg.content)
-      ch2.ack(msg);
-    } else {
-      console.log('Consumer cancelled by server')
+amqp.connect('amqp://localhost', function(error0, connection) {
+    if (error0) {
+        throw error0;
     }
-  })
-})
+    connection.createChannel(function(error1, channel) {
+        if (error1) {
+            throw error1;
+        }
+
+        var queue = 'hello';
+
+        channel.assertQueue(queue, {
+            durable: false
+        });
+
+        channel.consume(queue, function(msg) {
+            console.log(JSON.parse(msg.content));
+            LogRegisto(JSON.parse(msg.content))
+        }, {
+            noAck: true
+        });
+    });
 });
 
 

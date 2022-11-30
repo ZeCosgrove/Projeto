@@ -7,7 +7,7 @@ const LogerSchema = new Schema(
     {
         Level:{type:String, require: true},
         Action:{type:String, require:true},
-        Description:{type:String,require:true},
+        Description:{type:Object,require:true},
         User:{type:String, require:true},
         LogMoment:{type:Date, require:true}
     },

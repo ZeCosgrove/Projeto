@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const rateLimit = require('express-rate-limit')
-const amqplib = require('amqplib/callback_api');
+var amqp = require('amqplib/callback_api');
 
 //Demo Variables
 const tokenValidation = 60 * 10 //seconds
@@ -36,15 +36,35 @@ app.get('/', (req, res) => {
 app.post('/auth/register', async(req, res) => {
     const {email, nome, nif, username, password, dubPassword} = req.body
     if (!email){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/register`,
+            Description: 'Email necessário', User: null }
+        SendToLog(dataToLog)
+
         return res.status(422).json({msg: "Email necessário"})
     }
     else if (!username){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/register`,
+            Description: 'Username necessário', User: null }
+        SendToLog(dataToLog)
+
         return res.status(422).json({msg: "Username necessário"})
     }
     else if (!password){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/register`,
+            Description: 'Password necessária', User: null }
+        SendToLog(dataToLog)
+        
         return res.status(422).json({msg: "Password necessária"})
     }
     else if (dubPassword != password){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/register`,
+            Description: 'Passwords não condizem', User: null }
+        SendToLog(dataToLog)
+
         return res.status(422).json({msg: "Passwords não condizem"})
     }
     else if (!nome){
@@ -54,6 +74,11 @@ app.post('/auth/register', async(req, res) => {
     const userExists = await User.findOne({username: username})
 
     if (userExists){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/register`,
+            Description: 'Username já existe', User: null }
+        SendToLog(dataToLog)
+
         return res.status(422).json({msg: "Username já existe"})
     }
 
@@ -69,6 +94,11 @@ app.post('/auth/register', async(req, res) => {
     try {
         generatedId = await auth.save()
     } catch (err) {
+        dataToLog = {
+            Level: 'Error', Action: `/auth/register`,
+            Description: err, User: null }
+        SendToLog(dataToLog)
+
         res.status(500).json({msg: err})
     }
 
@@ -82,8 +112,20 @@ app.post('/auth/register', async(req, res) => {
 
     try {
         await user.save()
+
+        dataToLog = {
+            Level: 'Info', Action: `/auth/register`,
+            Description: req.body, User: null }
+        SendToLog(dataToLog)
+
         res.status(200).json(req.body)
     } catch (err) {
+
+        dataToLog = {
+            Level: 'Error', Action: `/auth/register`,
+            Description: err, User: null }
+        SendToLog(dataToLog)
+
         res.status(500).json({msg: err})
     }
 })
@@ -93,20 +135,40 @@ app.post('/auth/login', async(req, res) => {
     const {username, password} = req.body
 
     if(!username){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/login`,
+            Description: 'Username necessário', User: null }
+        SendToLog(dataToLog)
+
         return res.status(422).json({msg: "Username necessário"})
     }
     else if(!password){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/login`,
+            Description: 'Password necessária', User: null }
+        SendToLog(dataToLog)
+
         return res.status(422).json({msg: "Password necessária"})
     }
 
     const auth = await Auth.findOne({username: username})
 
     if (!auth){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/login`,
+            Description: 'Username não encontrado', User: null }
+        SendToLog(dataToLog)
+
         return res.status(404).json({msg: "Username não encontrado"})
     }
 
     const checkPassword = await bcrypt.compare(password, auth.password)
     if(!checkPassword){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/login`,
+            Description: 'Password inválida', User: null }
+        SendToLog(dataToLog)
+
         return res.status(422).json({msg: "Password inválida"})
     } 
 
@@ -118,34 +180,59 @@ app.post('/auth/login', async(req, res) => {
             expiresIn: tokenValidation
         })
 
-        res.status(200).json({
-            token
-        })
+        dataToLog = {
+            Level: 'Info', Action: `/auth/login`,
+            Description: token, User: null }
+        SendToLog(dataToLog)
+
+        res.status(200).json({token})
 
     } catch (err) {
+        dataToLog = {
+            Level: 'Error', Action: `/auth/login`,
+            Description: err, User: null }
+        SendToLog(dataToLog)
+
         res.status(500).json({msg: err})
     }
 })
 
 
-app.post('/auth/password', async(req, res) => {
+app.post('/auth/password', checkToken, async(req, res) => {
     const {password, newPassword} = req.body
 
     if(!password){
-        return res.status(422).json({msg: "Password necessário"})
+        dataToLog = {
+            Level: 'Error', Action: `/auth/password`,
+            Description: 'Password necessária', User: await getIdFromToken(req) }
+        SendToLog(dataToLog)
+
+        return res.status(422).json({msg: "Password necessária"})
     }
     else if(!newPassword){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/password`,
+            Description: 'Nova password necessária', User: await getIdFromToken(req) }
+        SendToLog(dataToLog)
         return res.status(422).json({msg: "Nova password necessária"})
     }
 
     const auth = await Auth.findOne({_id: await getIdFromToken(req)})
 
     if (!auth){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/password`,
+            Description: 'Autenticação necessária', User: await getIdFromToken(req) }
+        SendToLog(dataToLog)
         return res.status(404).json({msg: "Autenticação necessária"})
     }
 
     const checkPassword = await bcrypt.compare(password, auth.password)
     if(!checkPassword){
+        dataToLog = {
+            Level: 'Error', Action: `/auth/password`,
+            Description: 'Password inválida', User: await getIdFromToken(req) }
+        SendToLog(dataToLog)
         return res.status(422).json({msg: "Password inválida"})
     } 
 
@@ -154,30 +241,45 @@ app.post('/auth/password', async(req, res) => {
         const hash = await bcrypt.hash(newPassword, salt)
 
         const updatedUser = await Auth.findOneAndUpdate({username: auth.username}, {password: hash})
+        
+        dataToLog = {
+            Level: 'Info', Action: `/auth/password`,
+            Description: updatedUser, User: await getIdFromToken(req) }
+        SendToLog(dataToLog)
+
         res.status(200).json({updatedUser})
 
     } catch (err) {
+        
+        dataToLog = {
+            Level: 'Error', Action: `/auth/password`,
+            Description: err, User: await getIdFromToken(req) }
+        SendToLog(dataToLog)
+
         res.status(500).json({msg: err})
     }
 })
 
 app.get('/user/:id', checkToken, async(req, res) => {
     const id = req.params.id
+    let dataToLog
 
     const user = await User.findById(id, '-_id')
 
     if(!user){
+        dataToLog = {
+            Level: 'Error', Action: `/user/${id}`,
+            Description: user, User: await getIdFromToken(req) }
+        SendToLog(dataToLog)
+
         return res.status(422).json({msg: "Utilizador não encontrado"})
     }
 
-    let dataToLog = {
-        Level: 'Info',
-        Action: `/user/${id}`,
-        Description: user,
-        User: await getIdFromToken(req)
-    }
-
+    dataToLog = {
+        Level: 'Info', Action: `/user/${id}`,
+        Description: user, User: await getIdFromToken(req) }
     SendToLog(dataToLog)
+
     res.status(200).json(user)
 })
 
@@ -201,18 +303,26 @@ function checkToken(req, res, next) {
 
 const queue = 'tasks';
 function SendToLog(message){
-    amqplib.connect('amqp://localhost', (err, conn) => {
-        if (err) throw err;
+    amqp.connect('amqp://localhost', function(error0, connection) {
+        if (error0) {
+            throw error0;
+        }
+        connection.createChannel(function(error1, channel) {
+            if (error1) {
+                throw error1;
+            }
+            var queue = 'hello';
+            var msg = 'Hello world';
 
-        conn.createChannel((err, ch1) => {
-            if (err) throw err;
-
-            ch1.assertQueue(queue);
-
-            setInterval(() => {
-                ch1.sendToQueue(queue, Buffer.from(message));
-            }, 1000);
+            channel.assertQueue(queue, {
+                durable: false
+            });
+            channel.sendToQueue(queue, Buffer.from(JSON.stringify(message).toString()));
         });
+
+        setTimeout(function() {
+            connection.close();
+        }, 500);
     });
 }
 
