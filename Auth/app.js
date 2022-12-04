@@ -173,7 +173,7 @@ app.post('/auth/login', async(req, res) => {
     } 
 
     try{
-        const secret = process.env.secret
+        const secret = process.env.SECRET
         const token = jwt.sign({
             id: auth._id,
         }, secret, {
@@ -303,7 +303,7 @@ function checkToken(req, res, next) {
 
 const queue = 'tasks';
 function SendToLog(message){
-    amqp.connect('amqp://localhost', function(error0, connection) {
+    amqp.connect(`amqp://${process.env.LOGS_URI}`, function(error0, connection) {
         if (error0) {
             throw error0;
         }

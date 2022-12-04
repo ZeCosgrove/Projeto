@@ -36,7 +36,7 @@ async function LogRegisto(message) {
   console.log(LogCreated)
 }
 
-amqp.connect('amqp://localhost', function(error0, connection) {
+amqp.connect(`amqp://${process.env.LOGS_URI}`, function(error0, connection) {
     if (error0) {
         throw error0;
     }
