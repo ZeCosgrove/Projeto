@@ -7,8 +7,8 @@ const rateLimit = require('express-rate-limit')
 var amqp = require('amqplib/callback_api');
 
 //Demo Variables
-const tokenValidation = 60 * 10 //seconds
-const rateLimitTimer = 60 //seconds
+const tokenValidation = 60  //seconds
+const rateLimitTimer = 30 //seconds
 const rateLimiter = 10 //attempts
 
 //IP Rate Limiter
