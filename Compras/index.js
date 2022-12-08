@@ -16,8 +16,8 @@ app.use("/Compras",require('./routes/routes.js'))
 app.use('/', express.static(path.join(__dirname, 'static')))
 
 
-mongoose.connect(
-    `mongodb+srv://${dbUser}:${dbPassword}@cluster0.m0g1zvr.mongodb.net/?retryWrites=true&w=majority`
+mongoose.connect(  
+    `mongodb+srv://${dbUser}:${dbPassword}@cluster0.nl4ehnf.mongodb.net/?retryWrites=true&w=majority`
   ).then(() => {
   app.listen(Port)
   console.log("Accessed BD")

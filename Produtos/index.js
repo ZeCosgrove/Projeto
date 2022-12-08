@@ -17,7 +17,7 @@ app.use('/', express.static(path.join(__dirname, 'static')))
 
 
 mongoose.connect(
-    `mongodb+srv://${dbUser}:${dbPassword}@cluster0.m0g1zvr.mongodb.net/?retryWrites=true&w=majority`
+    `mongodb+srv://${dbUser}:${dbPassword}@cluster0.8704wbn.mongodb.net/?retryWrites=true&w=majority`
   ).then(() => {
   app.listen(Port)
   console.log("Accessed BD")

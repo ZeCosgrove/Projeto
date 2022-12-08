@@ -1,57 +1,35 @@
 //requires
-const Utilizadores = require('../../Auth/model/user')
 const Compras = require('../Models/compraModel')
+const jwt = require('jsonwebtoken')
 
+// Helpers
 const EstadosEnum = {
     NovaCompra: 'Nova Compra', 
     CompraAtual: 'Compra a Decorrer', 
     CompraFinalizada: 'Compra Finalizada'
 }
-
+async function getIdFromToken(req){
+    const usertoken = req.headers.authorization;
+    const token = usertoken.split(' ');
+    const tokenData = jwt.verify(token[1], process.env.SECRET);
+    return tokenData.id;
+}
 // *************************************** Registar *****************************************
 exports.NovaCompra = async(req, res) => {
-    const {Utilizador, EstadoCompra} = req.body
-
-    if (!Utilizador) {
-        res.json({status: 'Erro', error: 'Nenhum produto foi selecionado'})
-    }
-    if (!EstadoCompra) {
-        res.json({status: 'Erro', error: 'Nenhum Estado foi selecionado'})
-    }
-
-    const IdUtilizador = await Utilizadores.findOne({email: Utilizador})
-    if (!IdUtilizador) {
-        res.json({status: 'Erro', error: 'Esse Utilizador não existe'})
-    }
-
-    const indiceEstado = Object.values(EstadosEnum).indexOf(EstadoCompra);
-    const Estado = Object.keys(EstadosEnum)[indiceEstado];
-
-    if (!Estado) {
-        res.json({status: 'Erro', error: 'Esse Estado não existe'})
-    }
 
     const response = await Compras.create({
-        IdUtilizador,
-        Estado
+        IdUtilizador: await getIdFromToken(req),
+        Estado: "NovaCompra"
     })
 
-    res.json({status: 'Compra criada', compra: response})
+    res.json({status: response})
 }
 // *************************************** Atualizar *****************************************
 exports.AtualizarCompra = async(req, res) => {
-    const {Utilizador, NovoEstado} = req.body
+    const {NovoEstado} = req.body
 
-    if (!Utilizador) {
-        res.json({status: 'Erro', error: 'Nenhum produto foi selecionado'})
-    }
     if (!NovoEstado) {
         res.json({status: 'Erro', error: 'Nenhum Estado foi selecionado'})
-    }
-
-    const IdUtilizador = await Utilizadores.findOne({email: Utilizador})
-    if (!IdUtilizador) {
-        res.json({status: 'Erro', error: 'Esse Utilizador não existe'})
     }
 
     const indiceEstado = Object.values(EstadosEnum).indexOf(NovoEstado);
@@ -60,23 +38,17 @@ exports.AtualizarCompra = async(req, res) => {
         res.json({status: 'Erro', error: 'Esse Estado não existe'})
     }
 
-    const response = await Compras.updateOne(Compras.findOne({IdUtilizador: IdUtilizador}), {Estado: Estado})
-    res.json({status: 'ok', Atualizacao: response})
+    const compra = await Compras.findOne({IdUtilizador: await getIdFromToken(req)})
+    const response = await Compras.updateOne(compra, {Estado: Estado})
+    res.json({Atualizacao: "Atualizado", status: response})
 }
 // *************************************** Ver *****************************************
 exports.VerCompra = async(req, res) => {
-    const {Utilizador, EstadoAtual} = req.body
+    const {EstadoAtual} = req.body
 
-    if (!Utilizador) {
-        res.json({status: 'Erro', error: 'Nenhum produto foi selecionado'})
-    }
 
     if (!EstadoAtual) {
         res.json({status: 'Erro', error: 'Nenhum Estado Atual foi selecionado'})
-    }
-    const IdUtilizador = await Utilizadores.findOne({email: Utilizador})
-    if (!IdUtilizador) {
-        res.json({status: 'Erro', error: 'Esse Utilizador não existe'})
     }
 
     const indiceEstado = Object.values(EstadosEnum).indexOf(EstadoAtual);
@@ -85,39 +57,21 @@ exports.VerCompra = async(req, res) => {
         res.json({status: 'Erro', error: 'Esse Estado não existe'})
     }
 
-    const response = await Compras.findOne({IdUtilizador: IdUtilizador, Estado: Estado})
+    const response = await Compras.findOne({IdUtilizador: await getIdFromToken(req), Estado: Estado})
     res.json({Compra: response})
 }
 
 exports.VerCompras = async(req, res) => {
-    const {Utilizador} = req.body
-
-    if (!Utilizador) {
-        res.json({status: 'Erro', error: 'Nenhum produto foi selecionado'})
-    }
-
-    const IdUtilizador = await Utilizadores.findOne({email: Utilizador})
-    if (!IdUtilizador) {
-        res.json({status: 'Erro', error: 'Esse Utilizador não existe'})
-    }
-    const todasAsCompras = await Compras.find({IdUtilizador: IdUtilizador})
+    const todasAsCompras = await Compras.find({IdUtilizador: await getIdFromToken(req)})
     res.json({compras : todasAsCompras})
 }
 
 // *************************************** Remover *****************************************
 exports.RemoverCompra = async(req, res) => {
-    const {Utilizador, EstadoAtual} = req.body
-
-    if (!Utilizador) {
-        res.json({status: 'Erro', error: 'Nenhum produto foi selecionado'})
-    }
+    const { EstadoAtual} = req.body
 
     if (!EstadoAtual) {
         res.json({status: 'Erro', error: 'Nenhum Estado Atual foi selecionado'})
-    }
-    const IdUtilizador = await Utilizadores.findOne({email: Utilizador})
-    if (!IdUtilizador) {
-        res.json({status: 'Erro', error: 'Esse Utilizador não existe'})
     }
 
     const indiceEstado = Object.values(EstadosEnum).indexOf(EstadoAtual);
@@ -126,7 +80,7 @@ exports.RemoverCompra = async(req, res) => {
         res.json({status: 'Erro', error: 'Esse Estado não existe'})
     }
 
-    const compra = await Compras.findOne({IdUtilizador: IdUtilizador, Estado: Estado})
+    const compra = await Compras.findOne({IdUtilizador: await getIdFromToken(req), Estado: Estado})
     const response = await Compras.deleteOne(compra)
     res.json({status: response})
 }

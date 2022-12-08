@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 
 
 mongoose.connect(
-    `mongodb+srv://${dbUser}:${dbPassword}@cluster0.m0g1zvr.mongodb.net/?retryWrites=true&w=majority`
+    `mongodb+srv://${dbUser}:${dbPassword}@cluster0.grjgvsy.mongodb.net/?retryWrites=true&w=majority`
   ).then(() => {
   app.listen(Port)
   console.log("Accessed BD")
