@@ -12,7 +12,7 @@ app.use(express.urlencoded({
 const port = 8080
 
 
-app.get('/', (req, res, next) => {
+app.get('/', (req, res) => {
   res.status(200).send("Projeto UC AIS - 18809 e 18826")
 });
 

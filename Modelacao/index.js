@@ -1,5 +1,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
+const swaggerAutogen = require('swagger-autogen')()
+const swaggerUi = require('swagger-ui-express')
+const swaggerFile = require('./swagger_output.json')
 require('dotenv').config()
 
 const app = express()
@@ -12,6 +15,15 @@ const port = 8085
 
 app.use('/mapa', require('./route/mapaRoute'))
 app.use('/modelo', require('./route/modeloRoute'))
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
+
+
+//Documentation
+const outputFile = './swagger_output.json'
+const endpointsFiles = ['./route/mapaRoute.js', './route/modeloRoute.js']
+
+swaggerAutogen(outputFile, endpointsFiles)
+
 
 //Mongoose Connection
 const dbUser = process.env.DB_USER

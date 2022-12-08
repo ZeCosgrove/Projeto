@@ -1,5 +1,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
+const swaggerAutogen = require('swagger-autogen')()
+const swaggerUi = require('swagger-ui-express')
+const swaggerFile = require('./swagger_output.json')
 require('dotenv').config()
 
 const app = express()
@@ -11,6 +14,15 @@ app.use(express.urlencoded({
 const port = 8084
 
 app.use('/', require('./route/ajudaRoute'))
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
+
+
+//Documentation
+const outputFile = './swagger_output.json'
+const endpointsFiles = ['./route/ajudaRoute.js']
+
+swaggerAutogen(outputFile, endpointsFiles)
+
 
 //Mongoose Connection
 const dbUser = process.env.DB_USER
