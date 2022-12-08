@@ -25,13 +25,13 @@ exports.CriarProduto = async(req, res) => {
 
 // *************************************** Editar *****************************************
 exports.EditarNomeProduto = async(req, res) => {
-    const {nomeAntigo, novoNome} = req.body
+    const {idProduto, novoNome} = req.body
 
-    if (!novoNome || !nomeAntigo) {
+    if (!novoNome || !idProduto) {
         res.json({status: 'Error', error: 'Nome do produto não foi submetido'})
     }
 
-    const produtoDesatualizado = await Produtos.findOne({nome: nomeAntigo})
+    const produtoDesatualizado = await Produtos.findOne({_id: idProduto})
     if (!produtoDesatualizado) {
         res.json({status: 'error', error: 'Nome do produto escolhido não existe'})
     }
@@ -41,13 +41,13 @@ exports.EditarNomeProduto = async(req, res) => {
 }
 
 exports.EditarPrecoProduto = async(req, res) => {
-    const {nome, novoPreco} = req.body
+    const {idProduto, novoPreco} = req.body
 
-    if (!nome || !novoPreco) {
-        res.json({status: 'Error', error: 'Nome ou Preço do produto não foi submetido'})
+    if (!idProduto || !novoPreco) {
+        res.json({status: 'Error', error: 'Preço do produto não foi submetido'})
     }
 
-    const produtoDesatualizado = await Produtos.findOne({nome: nome})
+    const produtoDesatualizado = await Produtos.findOne({_id: idProduto})
     if (!produtoDesatualizado) {
         res.json({status: 'error', error: 'Nome do produto escolhido não existe'})
     }
@@ -58,15 +58,15 @@ exports.EditarPrecoProduto = async(req, res) => {
 
 // *************************************** Remover *****************************************
 exports.RemoverProduto = async(req, res) => {
-    const {nome} = req.body
+    const {idProduto} = req.body
 
-    if (!nome) {
-        res.json({status: 'error', error: 'Nome do produto não foi submetido'})
+    if (!idProduto) {
+        res.json({status: 'error', error: 'Produto não foi selecionado'})
     }
 
-    const produtoParaRemover = await Produtos.findOne({nome: nome})
+    const produtoParaRemover = await Produtos.findOne({_id: idProduto})
     if (!produtoParaRemover) {
-        res.json({status: 'error', error: 'Nome do produto escolhido não existe'})
+        res.json({status: 'error', error: 'Produto não existe'})
     }
 
     const stock = await Stocks.findOneAndDelete({IdProduto: produtoParaRemover._id})
@@ -77,13 +77,13 @@ exports.RemoverProduto = async(req, res) => {
 
 // *************************************** Ler *****************************************
 exports.LerProduto = async(req, res) => {
-    const {nome} = req.body
+    const {idProduto} = req.body
 
-    if (!nome) {
-        res.json({status: 'error', error: 'Nome do produto não foi submetido'})
+    if (!idProduto) {
+        res.json({status: 'error', error: 'Não foi submetido nenhum produto'})
     }
 
-    const produto = await Produtos.findOne({nome: nome})
+    const produto = await Produtos.findOne({_id: idProduto})
     if (!produto) {
         res.json({status: 'error', error: 'Nome do produto escolhido não existe'})
     }

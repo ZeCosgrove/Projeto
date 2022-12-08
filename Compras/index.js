@@ -12,7 +12,7 @@ const dbPassword = process.env.DB_PASS
 // app
 const app = express()
 app.use(bodyParser.json())
-app.use("/Compras",require('./routes/routes.js'))
+app.use("/",require('./routes/routes.js'))
 app.use('/', express.static(path.join(__dirname, 'static')))
 
 

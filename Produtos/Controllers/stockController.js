@@ -12,7 +12,7 @@ exports.AdicionarStock = async(req, res) =>{
         res.json({status: 'error', error: 'Produto não selecionado'})
     }
 
-    const IdProduto = await Produtos.findOne({nome: produto})
+    const IdProduto = await Produtos.findOne({_id: produto})
     if (!IdProduto) {
         res.json({status: 'error', error: 'Produto selecionado não existe'})
     }
@@ -42,7 +42,7 @@ exports.EditarStock = async(req, res) =>{
         res.json({status: 'error', error: 'Produto não selecionado'})
     }
 
-    const IdProduto = await Produtos.findOne({nome: produto})
+    const IdProduto = await Produtos.findOne({_id: produto})
     if (!IdProduto) {
         res.json({status: 'error', error: 'Produto selecionado não existe'})
     }
@@ -64,7 +64,7 @@ exports.RemoverStock = async(req, res) =>{
         res.json({status: 'error', error: 'Produto não selecionado'})
     }
 
-    const IdProduto = await Produtos.findOne({nome: produto})
+    const IdProduto = await Produtos.findOne({_id: produto})
     if (!IdProduto) {
         res.json({status: 'error', error: 'Produto selecionado não existe'})
     }
@@ -87,7 +87,7 @@ exports.LerStock = async(req, res) => {
         res.json({status: 'error', error: 'Produto não selecionado'})
     }
 
-    const IdProduto = await Produtos.findOne({nome: produto})
+    const IdProduto = await Produtos.findOne({_id: produto})
     if (!IdProduto) {
         res.json({status: 'error', error: 'Produto selecionado não existe'})
     }
