@@ -10,4 +10,5 @@ router.route('/VerPromocoes').get(promocaoController.VerPromocoes)
 router.route('/RemoverPromocao').post(promocaoController.RemoverPromocao)
 //TODO: validar promocao
 
+
 module.exports = router
