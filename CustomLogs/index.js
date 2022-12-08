@@ -32,14 +32,13 @@ async function LogRegisto(message) {
       User,
       LogMoment
   })
-
-  console.log(LogCreated)
 }
 
 amqp.connect(`amqp://${process.env.LOGS_URI}`, function(error0, connection) {
     if (error0) {
         throw error0;
     }
+
     connection.createChannel(function(error1, channel) {
         if (error1) {
             throw error1;

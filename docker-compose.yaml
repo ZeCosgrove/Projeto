@@ -40,6 +40,17 @@ services:
      - auth
     networks:
      - scc
+  produtos:
+    build:
+      context: ./Produtos
+    environment:
+     - LOGS_URI=rabbitmq
+    ports: 
+     - '8083:8083'
+    depends_on:
+     - auth
+    networks:
+     - scc
   ajuda:
     build:
       context: ./Ajuda
@@ -51,6 +62,17 @@ services:
      - auth
     networks:
      - scc
+  modelacao:
+    build:
+      context: ./Modelacao
+    environment:
+     - LOGS_URI=rabbitmq
+    ports: 
+     - '8085:8085'
+    depends_on:
+     - auth
+    networks:
+     - scc
   compras:
     build:
       context: ./Compras
@@ -58,17 +80,6 @@ services:
      - LOGS_URI=rabbitmq
     ports: 
      - '8086:8086'
-    depends_on:
-     - auth
-    networks:
-     - scc
-  produtos:
-    build:
-      context: ./Produtos
-    environment:
-     - LOGS_URI=rabbitmq
-    ports: 
-     - '8083:8083'
     depends_on:
      - auth
     networks:
