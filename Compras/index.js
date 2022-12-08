@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 require('dotenv').config();
 const dbUser = process.env.DB_USER
 const dbPassword = process.env.DB_PASS
-const Port = process.env.PORTCOMPRA
+
 
 // app
 const app = express()
@@ -19,6 +19,6 @@ app.use('/', express.static(path.join(__dirname, 'static')))
 mongoose.connect(  
     `mongodb+srv://${dbUser}:${dbPassword}@cluster0.nl4ehnf.mongodb.net/?retryWrites=true&w=majority`
   ).then(() => {
-  app.listen(Port)
+  app.listen(8086)
   console.log("Accessed BD")
   }).catch((err) => console.log(err))
