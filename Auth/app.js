@@ -7,7 +7,7 @@ const rateLimit = require('express-rate-limit')
 var amqp = require('amqplib/callback_api');
 
 //Demo Variables
-const tokenValidation = 60  //seconds
+const tokenValidation = 60 * 60 //seconds
 const rateLimitTimer = 30 //seconds
 const rateLimiter = 10 //attempts
 
@@ -71,7 +71,8 @@ app.post('/auth/register', async(req, res) => {
         //generate random name
     }
 
-    const userExists = await User.findOne({username: username})
+    const userExists = await Auth.findOne({username: username})
+    console.log(userExists)
 
     if (userExists){
         dataToLog = {
@@ -172,10 +173,13 @@ app.post('/auth/login', async(req, res) => {
         return res.status(422).json({msg: "Password inválida"})
     } 
 
+    const user = await User.findOne({_id: auth._id})
+
     try{
         const secret = process.env.SECRET
         const token = jwt.sign({
             id: auth._id,
+            role: user.role
         }, secret, {
             expiresIn: tokenValidation
         })
