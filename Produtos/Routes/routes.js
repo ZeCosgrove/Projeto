@@ -28,7 +28,7 @@ function isAdmin(req, res, next) {
     if(tokenData.role == 3)
         next()
     else
-        res.status(403)
+        res.status(403).json() 
 }
 
 function isAdminOrStaff(req, res, next) {
@@ -39,7 +39,7 @@ function isAdminOrStaff(req, res, next) {
     if(tokenData.role == 3 || tokenData.role == 2)
         next()
     else
-        res.status(403)
+        res.status(403).json()
 }
 
 // Produtos
